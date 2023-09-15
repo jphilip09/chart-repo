@@ -29,10 +29,14 @@ spec:
         prometheus.io/port: {{.Values.metrics.annotations.port | quote}}
         {{- end }}
     spec:
+      {{- with .Values.image.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.image.imagePullSecrets | nindent 8 }}
+      {{- end }}
       containers:
       - name: {{ template "mydeployment.fullname" . }}
-        image: artifactory.riftio.com/docker/rw.pong:2002
-        imagePullPolicy: Always
+        image: {{ .Values.image.repository -}} : {{- .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

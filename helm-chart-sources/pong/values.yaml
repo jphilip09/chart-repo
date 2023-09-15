@@ -8,6 +8,16 @@ global:
   # ID of NS used to deploy this chart
   nsId:
 
+image:
+  # Image path
+  repository: rt.cloud.dzsi.local/docker/rw.pong
+  # Image tag
+  tag: "2005"
+  # Image pull policy
+  pullPolicy: IfNotPresent
+  # Image secrets, if any
+  imagePullSecrets: []
+
 # Name of network-attachment definition associated with macvlan interface
 macvlanNetName: "default-macvlan-net1"
 # # Namespace associate with above network-attachment definition associated with macvlan interface
