@@ -43,7 +43,11 @@ spec:
                 values:
                 - pong
             topologyKey: kubernetes.io/hostname
+      {{- with .Values.image.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.image.imagePullSecrets | nindent 8 }}
+      {{- end }}
       containers:
       - name: {{ template "mydeployment.fullname" . }}
-        image: artifactory.riftio.com/docker/rw.ping:2002
-        imagePullPolicy: Always
+        image: {{ .Values.image.repository -}} : {{- .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
