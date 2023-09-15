@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  {{ template "mydeployment.fullname" . }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ template "mydeployment.fullname" . }}
+
+spec:
+  replicas: {{.Values.replicaCount}}
+  selector:
+    matchLabels:
+      app: {{ template "mydeployment.fullname" . }}
+      release: {{ .Release.Name }}
+
+  template:
+    metadata:
+      labels:
+        app: {{ template "mydeployment.fullname" . }}
+        release: {{ .Release.Name }}
+        network-service-id: {{ .Values.global.nsId }}
+        type: ping
+      annotations:
+        k8s.v1.cni.cncf.io/networks: '[{"name": {{ .Values.macvlanNetName | quote }},
+                                        "namespace": {{ .Values.macvlanNetNamespace | quote }}}]'
+        {{- if .Values.metrics.enabled }}
+        prometheus.io/scrape: {{ .Values.metrics.annotations.scrape | quote }}
+        prometheus.io/path: {{.Values.metrics.annotations.path }}
+        prometheus.io/port: {{.Values.metrics.annotations.port | quote}}
+        {{- end }}
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: network-service-id
+                operator: In
+                values:
+                - {{ .Values.global.nsId }}
+              - key: type
+                operator: In
+                values:
+                - pong
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: {{ template "mydeployment.fullname" . }}
+        image: artifactory.riftio.com/docker/rw.ping:2002
+        imagePullPolicy: Always
